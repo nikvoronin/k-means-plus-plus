@@ -1,5 +1,4 @@
 ﻿using KMeans.Models;
-using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -11,7 +10,8 @@ namespace KMeans;
 /// </summary>
 public class KMeansProcessor<T>(
     IKmInitializer<T> clusterInitializer,
-    IDistanceEstimator<T> distanceEstimator )
+    IDistanceEstimator<T> distanceEstimator,
+    ProcessorOptions? options = null )
     where T : INumber<T>
 {
     /// <summary>
@@ -25,8 +25,7 @@ public class KMeansProcessor<T>(
         var clusters =
             _clusterInitializer.Initialize( volume, numClusters, _distance );
 
-        // TODO: add option for upper limit of iterations
-        for (var iteration = 0; iteration < 1000; iteration++) {
+        for (var iteration = 0; iteration < _options.MaxIterations; iteration++) {
             var newClusters =
                 ArrangePointsParallel( volume, clusters );
 
@@ -61,7 +60,7 @@ public class KMeansProcessor<T>(
         for (var i = 0; i < numClusters; i++)
             nextClusters[i] = new KmCluster<T>();
 
-        var numNodes = Environment.ProcessorCount; // TODO: limit threads number
+        var numNodes = _options.ThreadCount;
 
         var nodes = new List<KmCluster<T>[]>();
         for (var k = 0; k < numNodes; k++) {
@@ -87,7 +86,6 @@ public class KMeansProcessor<T>(
             for (int px = startIx; px < startIx + chunkLen; px++) {
                 var point = volume[px];
 
-                // TODO? extract distance calculator into a class
                 var minDistance =
                     _distance.Estimate(
                         centroids[nodeIx][0],
@@ -161,4 +159,5 @@ public class KMeansProcessor<T>(
 
     private readonly IKmInitializer<T> _clusterInitializer = clusterInitializer;
     private readonly IDistanceEstimator<T> _distance = distanceEstimator;
+    private readonly ProcessorOptions _options = options ?? new();
 }

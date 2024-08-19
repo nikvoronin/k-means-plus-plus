@@ -45,7 +45,11 @@ foreach (var picture in samplePictures) {
     var clusters =
         new KMeansProcessor<double>(
             new KmInitializer<double>(),
-            new EuclideanDistance<double>() )
+            new EuclideanDistance<double>(),
+            new() {
+                //ThreadCount = 4,
+                //MaxIterations = 100
+            } )
         .Compute( points, ClustersNumber );
 
     Console.WriteLine( $"Found in {sw.ElapsedMilliseconds / 1000f:.000}s" );
