@@ -1,25 +1,26 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 
-namespace KMeans;
+namespace KMeans.Models;
 
 /// <summary>
 /// Vector cluster for the K-Means algorithm.
 /// </summary>
-public class KmCluster
+public class KmCluster<T>
+    where T : INumber<T>
 {
-    public Vector3 Centroid {
+    public VectorN<T> Centroid {
         get {
             if (_numPoints != _points.Count) {
                 _numPoints = _points.Count;
-                _centroid = _accumulator / _numPoints;
+                _centroid = _accumulator / T.CreateChecked( _numPoints );
             }
 
             return _centroid;
         }
     }
 
-    public IReadOnlyList<Vector3> Points => _points;
+    public IReadOnlyList<VectorN<T>> Points => _points;
 
     /// <summary>
     /// Create cluster with empty volume.
@@ -35,7 +36,7 @@ public class KmCluster
     /// <param name="centroid">
     /// Centroid vector of the cluster.
     /// </param>
-    public KmCluster( Vector3 centroid )
+    public KmCluster( VectorN<T> centroid )
     {
         _points = [centroid];
         _accumulator = centroid;
@@ -47,15 +48,15 @@ public class KmCluster
     /// <param name="point">
     /// New vector to append to the cluster.
     /// </param>
-    public void AddPoint( Vector3 point )
+    public void AddPoint( VectorN<T> point )
     {
         _accumulator += point;
         _points.Add( point );
     }
 
-    private Vector3 _accumulator = Vector3.Zero;
-    private Vector3 _centroid = Vector3.Zero;
+    private VectorN<T> _accumulator = VectorN<T>.Empty;
+    private VectorN<T> _centroid = VectorN<T>.Empty;
     private int _numPoints;
 
-    private readonly List<Vector3> _points;
+    private readonly List<VectorN<T>> _points;
 }

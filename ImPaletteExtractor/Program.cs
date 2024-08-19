@@ -1,12 +1,14 @@
 ﻿using Colourful;
 using KMeans;
+using KMeans.DistanceEstimators;
+using KMeans.Initializers;
+using KMeans.Models;
 using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Numerics;
 
-const float ResizedImageSize = 400f;
+const double ResizedImageSize = 400f;
 const int ClustersNumber = 10;
 
 var samplePictures =
@@ -27,23 +29,26 @@ IColorConverter<LabColor, RGBColor> lab2rgb = new ConverterBuilder()
 
 foreach (var picture in samplePictures) {
     using var bitmap = LoadResized( picture );
-    Vector3[] points = new Vector3[bitmap.Width * bitmap.Height];
+    VectorN<double>[] points =
+        new VectorN<double>[bitmap.Width * bitmap.Height];
 
-    for (int y = 0; y < bitmap.Height; y++) {
-        for (int x = 0; x < bitmap.Width; x++) {
+    for (var y = 0; y < bitmap.Height; y++) {
+        for (var x = 0; x < bitmap.Width; x++) {
             var pixel = bitmap.GetPixel( x, y );
             var lab = rgb2lab.Convert( RGBColor.FromColor( pixel ) );
             points[y * bitmap.Width + x] =
-                new Vector3( (float)lab.L, (float)lab.a, (float)lab.b );
+                new VectorN<double>( lab.L, lab.a, lab.b );
         }
     }
 
     var sw = Stopwatch.StartNew();
     var clusters =
-        new KMeansProcessor( new KppInitializer() )
+        new KMeansProcessor<double>(
+            new KmInitializer<double>(),
+            new EuclideanDistance<double>() )
         .Compute( points, ClustersNumber );
 
-    Console.WriteLine( $"Found in {sw.ElapsedMilliseconds / 1000f:.00}s" );
+    Console.WriteLine( $"Found in {sw.ElapsedMilliseconds / 1000f:.000}s" );
 
     DrawSamples( picture, clusters );
 }
@@ -65,7 +70,7 @@ Bitmap LoadResized( string imagePath )
 
 void DrawSamples(
     string imagePath,
-    KmCluster[] clusters )
+    KmCluster<double>[] clusters )
 {
     var dstFilename = $"{imagePath}-{Environment.TickCount}.jpg";
 
@@ -75,9 +80,9 @@ void DrawSamples(
     const float margin = 10f;
     var boxSize = (dst.Height - margin) / ClustersNumber - margin;
 
-    for (int i = 0; i < clusters.Length; i++) {
+    for (var i = 0; i < clusters.Length; i++) {
         var labMean = clusters[i].Centroid;
-        var labColor = new LabColor( labMean.X, labMean.Y, labMean.Z );
+        var labColor = new LabColor( labMean[0], labMean[1], labMean[2] );
 
         g.FillRectangle(
             new SolidBrush( lab2rgb.Convert( labColor ) ),

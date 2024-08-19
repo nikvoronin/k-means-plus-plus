@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Numerics;
+using KMeans.Models;
 
-namespace KMeans;
+namespace KMeans.Initializers;
 
 /// <summary>
 /// Simple cluster initializer.
 /// </summary>
-public class KmInitializer : IKmInitializer
+public class KmInitializer<T> : IKmInitializer<T>
+    where T : INumber<T>
 {
     /// <summary>
     /// Initialize first iteration by choosing random Centroid volume
@@ -21,15 +23,16 @@ public class KmInitializer : IKmInitializer
     /// <returns>
     /// Initial cluster set.
     /// </returns>
-    public KmCluster[] Initialize(
-        Vector3[] volume, int numClusters,
-        Random? random = null )
+    public KmCluster<T>[] Initialize(
+        VectorN<T>[] volume, int numClusters,
+        IDistanceEstimator<T> distanceEstimator,
+        Random? random = null)
     {
         random ??= Random.Shared;
 
-        KmCluster[] clusters = new KmCluster[numClusters];
-        for (int i = 0; i < numClusters; i++)
-            clusters[i] = new KmCluster( volume[random.Next( volume.Length )] );
+        KmCluster<T>[] clusters = new KmCluster<T>[numClusters];
+        for (var i = 0; i < numClusters; i++)
+            clusters[i] = new KmCluster<T>(volume[random.Next(volume.Length)]);
 
         return clusters;
     }
