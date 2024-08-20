@@ -27,6 +27,18 @@ IColorConverter<LabColor, RGBColor> lab2rgb = new ConverterBuilder()
     .ToRGB( RGBWorkingSpaces.sRGB )
     .Build();
 
+var pixelToVectorConverter =
+    new Func<Color, VectorN<double>>( color => {
+        var lab = rgb2lab.Convert( RGBColor.FromColor( color ) );
+        return new VectorN<double>( lab.L, lab.a, lab.b );
+    } );
+
+var vectorToPixelConverter =
+    new Func<VectorN<double>, Color>( vector => {
+        var labColor = new LabColor( vector[0], vector[1], vector[2] );
+        return lab2rgb.Convert( labColor );
+    } );
+
 foreach (var picture in samplePictures) {
     using var bitmap = LoadResized( picture );
     VectorN<double>[] points =
@@ -35,9 +47,7 @@ foreach (var picture in samplePictures) {
     for (var y = 0; y < bitmap.Height; y++) {
         for (var x = 0; x < bitmap.Width; x++) {
             var pixel = bitmap.GetPixel( x, y );
-            var lab = rgb2lab.Convert( RGBColor.FromColor( pixel ) );
-            points[y * bitmap.Width + x] =
-                new VectorN<double>( lab.L, lab.a, lab.b );
+            points[y * bitmap.Width + x] = pixelToVectorConverter( pixel );
         }
     }
 
@@ -85,11 +95,9 @@ void DrawSamples(
     var boxSize = (dst.Height - margin) / ClustersNumber - margin;
 
     for (var i = 0; i < clusters.Length; i++) {
-        var labMean = clusters[i].Centroid;
-        var labColor = new LabColor( labMean[0], labMean[1], labMean[2] );
-
         g.FillRectangle(
-            new SolidBrush( lab2rgb.Convert( labColor ) ),
+            new SolidBrush(
+                vectorToPixelConverter( clusters[i].Centroid ) ),
             dst.Width - boxSize - margin,
             i * boxSize + margin * (i + 1),
             boxSize, boxSize );
