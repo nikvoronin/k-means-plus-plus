@@ -54,7 +54,7 @@ foreach (var picture in samplePictures) {
     var sw = Stopwatch.StartNew();
     var clusters =
         new KMeansProcessor<double>(
-            new KmInitializer<double>(),
+            new KppInitializer<double>(),
             new EuclideanDistance<double>(),
             new() {
                 //ThreadCount = 4,
