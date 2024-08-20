@@ -135,15 +135,14 @@ public class KMeansProcessor<T>(
     /// </returns>
     private bool IsStable(
         KmCluster<T>[] sourceClusters,
-        KmCluster<T>[] nextClusters,
-        float epsilon = .1f )
+        KmCluster<T>[] nextClusters )
     {
         for (var i = 0; i < sourceClusters.Length; i++) {
             if (sourceClusters[i].Points.Count != nextClusters[i].Points.Count)
                 return false;
         }
 
-        var eps = T.CreateTruncating( epsilon );
+        var eps = T.CreateTruncating( _options.ConvergenceEpsilon );
 
         for (var i = 0; i < sourceClusters.Length; i++) {
             var distance =

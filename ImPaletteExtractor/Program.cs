@@ -58,7 +58,8 @@ foreach (var picture in samplePictures) {
             new EuclideanDistance<double>(),
             new() {
                 //ThreadCount = 4,
-                //MaxIterations = 100
+                //MaxIterations = 100,
+                //ConvergenceEpsilon = .01
             } )
         .Compute( points, ClustersNumber );
 
