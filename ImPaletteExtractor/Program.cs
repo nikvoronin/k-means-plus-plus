@@ -113,7 +113,7 @@ void DrawSamples(
             boxSize, boxSize );
     }
 
-    Console.WriteLine( string.Join( "; ", hexs ) );
+    Console.WriteLine( "\t" + string.Join( "; ", hexs ) );
 
     dst.Save( dstFilename );
 }
