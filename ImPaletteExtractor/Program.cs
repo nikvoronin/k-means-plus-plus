@@ -36,7 +36,7 @@ var pixelToVectorConverter =
 
 var pixelToHexConverter =
     new Func<Color, string>( color =>
-        $"#{color.R:X}{color.G:X}{color.B:X}" );
+        $"#{color.R:X2}{color.G:X2}{color.B:X2}" );
 
 var vectorToPixelConverter =
     new Func<VectorN<double>, Color>( vector => {
@@ -113,7 +113,7 @@ void DrawSamples(
             boxSize, boxSize );
     }
 
-    Console.WriteLine( "\t" + string.Join( "; ", hexs ) );
+    Console.WriteLine( "    " + string.Join( "; ", hexs ) );
 
     dst.Save( dstFilename );
 }
