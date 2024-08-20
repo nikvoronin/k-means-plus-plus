@@ -4,6 +4,7 @@ using KMeans.DistanceEstimators;
 using KMeans.Initializers;
 using KMeans.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -32,6 +33,10 @@ var pixelToVectorConverter =
         var lab = rgb2lab.Convert( RGBColor.FromColor( color ) );
         return new VectorN<double>( lab.L, lab.a, lab.b );
     } );
+
+var pixelToHexConverter =
+    new Func<Color, string>( color =>
+        $"#{color.R:X}{color.G:X}{color.B:X}" );
 
 var vectorToPixelConverter =
     new Func<VectorN<double>, Color>( vector => {
@@ -95,14 +100,20 @@ void DrawSamples(
     const float margin = 10f;
     var boxSize = (dst.Height - margin) / ClustersNumber - margin;
 
+    List<string> hexs = [];
     for (var i = 0; i < clusters.Length; i++) {
+        var color = vectorToPixelConverter( clusters[i].Centroid );
+
+        hexs.Add( pixelToHexConverter( color ) );
+
         g.FillRectangle(
-            new SolidBrush(
-                vectorToPixelConverter( clusters[i].Centroid ) ),
+            new SolidBrush( color ),
             dst.Width - boxSize - margin,
             i * boxSize + margin * (i + 1),
             boxSize, boxSize );
     }
+
+    Console.WriteLine( string.Join( "; ", hexs ) );
 
     dst.Save( dstFilename );
 }
