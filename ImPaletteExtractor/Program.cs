@@ -102,12 +102,12 @@ Bitmap LoadResized( string imagePath )
 {
     using var src = new Bitmap( imagePath );
 
-    Print( $"Size: {src.Width}x{src.Height}px" );
-
     var k =
         src.Width < ResizedImageSize ? 1.0
         : ResizedImageSize / src.Width;
     var dst = new Bitmap( (int)(src.Width * k), (int)(src.Height * k) );
+
+    Print( $"Size: {src.Width}x{src.Height}px, downscaled to {dst.Width}x{dst.Height}px." );
 
     using var g = Graphics.FromImage( dst );
     g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;

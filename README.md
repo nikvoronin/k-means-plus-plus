@@ -30,7 +30,7 @@
 |<img width=250 src="https://github.com/user-attachments/assets/a54fa91a-9af4-4b44-ab8b-a9d1efc728ee">|<img width=250 src="https://github.com/user-attachments/assets/89cfb474-f6d4-4fe9-aecc-05e696204e3c">|<img width=250 src="https://github.com/user-attachments/assets/66dd7a8f-c9da-41bb-bf46-6888150d245e">|
 |<img width=250 src="https://github.com/user-attachments/assets/99744581-e937-44d6-874b-a71c1f129b9d">|<img width=250 src="https://github.com/user-attachments/assets/5636986d-7d3b-4e0f-a605-4f9d6d02258e">|<img width=250 src="https://github.com/user-attachments/assets/26899da7-af1c-4641-8c5c-36ccc4e6dbb3">|
 
-Example of console output: _(values are closed to images above but not actual)_
+Example of console output: _(the values are close to images above but not actual)_
 
 ```plain
 Vectors base type = Double
@@ -41,7 +41,7 @@ Clusters initializer = KppInitializer`1
 Distance estimator = EuclideanDistance`1
 
 apod20240814.jpeg
-  Size: 4855x3237px
+  Size: 4855x3237px, downscaled to 400x266px.
   Found in 3.654s
   Cluster 0: 28077 points
   Cluster 1: 17226 points
@@ -55,7 +55,7 @@ apod20240814.jpeg
   Cluster 9: 10598 points
   Colors: #322934; #493745; #7A5A4C; #81436C; #140F08; #815866; #B96788; #AD4A91; #BA8B87; #613C55
 bing000.jpeg
-  Size: 3840x2160px
+  Size: 3840x2160px, downscaled to 400x225px.
   Found in 4.091s
   Cluster 0: 14070 points
   Cluster 1: 5400 points
@@ -70,7 +70,7 @@ bing000.jpeg
   Colors: #2F2C4D; #B9532C; #504385; #733B36; #1C1A1E; #9088C8; #594C64; #8D824A; #CFCCEC; #474838
   ...
 wikipedia20240814.jpeg
-  Size: 8256x5504px
+  Size: 8256x5504px, downscaled to 400x266px.
   Found in 2.088s
   Cluster 0: 1816 points
   Cluster 1: 46070 points
