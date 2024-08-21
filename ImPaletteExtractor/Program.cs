@@ -7,10 +7,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 
 const double ResizedImageSize = 400f;
 const int ClustersNumber = 10;
+
+CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
 var samplePictures =
     Directory.GetFiles(
@@ -44,7 +48,35 @@ var vectorToPixelConverter =
         return lab2rgb.Convert( labColor );
     } );
 
+ProcessorOptions options =
+    new() {
+        //ThreadCount = 4,
+        //MaxIterations = 100,
+        //ConvergenceEpsilon = .01
+    };
+
+var initializer = new KppInitializer<double>();
+var distanceEstimator = new EuclideanDistance<double>();
+
+var processor =
+    new KMeansProcessor<double>(
+        initializer,
+        distanceEstimator,
+        options );
+
+Console.WriteLine( $"""
+    Vectors base type = {processor.GetType().GenericTypeArguments[0].Name}
+    Number of threads = {options.ThreadCount}
+    Max iterations = {options.MaxIterations}
+    Convergence epsilon = {options.ConvergenceEpsilon}
+    Clusters initializer = {initializer.GetType().Name}
+    Distance estimator = {distanceEstimator.GetType().Name}
+
+    """ );
+
 foreach (var picture in samplePictures) {
+    Console.WriteLine( new FileInfo( picture ).Name );
+
     using var bitmap = LoadResized( picture );
     VectorN<double>[] points =
         new VectorN<double>[bitmap.Width * bitmap.Height];
@@ -57,18 +89,11 @@ foreach (var picture in samplePictures) {
     }
 
     var sw = Stopwatch.StartNew();
-    var clusters =
-        new KMeansProcessor<double>(
-            new KppInitializer<double>(),
-            new EuclideanDistance<double>(),
-            new() {
-                //ThreadCount = 4,
-                //MaxIterations = 100,
-                //ConvergenceEpsilon = .01
-            } )
-        .Compute( points, ClustersNumber );
+    var clusters = processor.Compute( points, ClustersNumber );
+    Print( $"Found in {sw.ElapsedMilliseconds / 1000f:.000}s" );
 
-    Console.WriteLine( $"Found in {sw.ElapsedMilliseconds / 1000f:.000}s" );
+    foreach (var clusterIx in Enumerable.Range( 0, clusters.Length ))
+        Print( $"Cluster {clusterIx}: {clusters[clusterIx].Points.Count} points" );
 
     DrawSamples( picture, clusters );
 }
@@ -76,6 +101,9 @@ foreach (var picture in samplePictures) {
 Bitmap LoadResized( string imagePath )
 {
     using var src = new Bitmap( imagePath );
+
+    Print( $"Size: {src.Width}x{src.Height}px" );
+
     var k =
         src.Width < ResizedImageSize ? 1.0
         : ResizedImageSize / src.Width;
@@ -113,7 +141,10 @@ void DrawSamples(
             boxSize, boxSize );
     }
 
-    Console.WriteLine( "    " + string.Join( "; ", hexs ) );
+    Print( "Colors: " + string.Join( "; ", hexs ) );
 
     dst.Save( dstFilename );
 }
+
+void Print( string text ) =>
+    Console.WriteLine( $"  {text}" );
