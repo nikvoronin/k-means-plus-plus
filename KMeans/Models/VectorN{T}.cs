@@ -25,14 +25,16 @@ public class VectorN<T> : IEquatable<VectorN<T>>
 
     public VectorN( params T[] values )
     {
-        var vals = values ?? [];
-        _values = new T[vals.Length];
-        Array.Copy( vals, _values, vals.Length );
-
+        _values = values ?? [];
         Dimension = _values.Length;
     }
 
-    public VectorN<T> Clone() => new( _values );
+    public VectorN<T> Clone()
+    {
+        var components = new T[_values.Length];
+        Array.Copy( _values, components, _values.Length );
+        return new( components );
+    }
 
     public bool Equals( [AllowNull] VectorN<T> other )
     {
