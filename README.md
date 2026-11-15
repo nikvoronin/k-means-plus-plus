@@ -1,8 +1,14 @@
 # Multithreading K-Means++ algorithm
 
---with multidimensional vectors.
+- with multidimensional vectors
+- Hamerly acceleration
+- SIMD distances
+- weighted points
+- no per-point allocations
+- and deterministic results for a fixed seed.
 
-[Vector-3](https://github.com/nikvoronin/k-means-plus-plus/tree/vector-3) branch contains simple but more efficient version of image palette extraction. It is using `System.Numerics.Vector3` type and applied in [The Last Wallpaper](https://github.com/nikvoronin/LastWallpaper/tree/main/LastWallpaper/Logic/KMeans) project to make colored mosaic tray icons.
+[Vector-3](https://github.com/nikvoronin/k-means-plus-plus/tree/vector-3) branch contains simple but more efficient version of image palette extraction.
+It is using `System.Numerics.Vector3` type and applied in [The Last Wallpaper](https://github.com/nikvoronin/LastWallpaper/tree/main/LastWallpaper/Logic/KMeans) project to make colored mosaic tray icons.
 
 ## K-Means Processor
 
@@ -50,6 +56,35 @@ var firstCentroid = result.Centroid(0);
 ```plain
 dotnet run -c Release --project KMeans.Benchmarks -- --filter '*'
 ```
+
+### Results compared to `legacy-net8`
+
+Same workload as above, BenchmarkDotNet, .NET 10.0.15, x64, AVX2, 22 logical cores.
+The `legacy-net8` code was run on the same .NET 10 runtime, so the numbers show the code changes only.
+
+| Benchmark | Dimension | `legacy-net8` | Lloyd | Hamerly (default) | Speed-up |
+|---|---:|---:|---:|---:|---:|
+| Compute: time | 3 | 364 ms | 33.5 ms | **18.4 ms** | ×20 |
+| Compute: allocated | 3 | 488 MB | 1.8 MB | 3.6 MB | ×135 less |
+| Compute: time | 16 | 263–407 ms¹ | 72.8 ms | **23.8 ms** | ×11–17 |
+| Compute: allocated | 16 | 968 MB | 2.5 MB | 4.3 MB | ×224 less |
+| K-Means++ initialization | 3 | 65 ms | 4.6 ms | 4.6 ms | ×14 |
+| K-Means++ initialization | 16 | 165 ms | 6.3 ms | 6.3 ms | ×26 |
+
+¹ The legacy run was noisy (median 263 ms, mean 407 ms): its initialization was not seeded.
+
+Where it comes from:
+
+- No allocations per point: the legacy version created a new vector on every point addition
+  and copied all points between clusters on every iteration.
+- Flat row-major points instead of an object per point (24 instead of ~80 bytes for 3 doubles).
+- Distance estimators are `struct`s inlined into the hot loop; no square root to find the nearest centroid;
+  `Vector<T>` SIMD for wide vectors.
+- Hamerly bounds skip most distance computations once the clusters settle.
+- K-Means++ updates the distances to the newest centroid only: O(n·k) instead of O(n·k²), in parallel.
+- Small fixed ranges with ordered merging: balanced load on hybrid CPUs and deterministic sums.
+- The palette extractor reads pixels with `LockBits` instead of `GetPixel`
+  and merges identical colors into weighted points (~90 000 pixels → 8 000–21 000 points).
 
 ## Im Palette Extractor
 
