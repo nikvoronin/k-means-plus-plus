@@ -6,21 +6,46 @@
 
 ## K-Means Processor
 
-- ProcessorOptions
-    - ThreadCount
-    - Number of iterations
-- VectorN\<T\>
-- KmCluster
-    - Centroid
-- IKmInitializer
-    - Simple
-    - K++
-- IDistanceEstimator
-    - Euclidean, +Root
-    - Chebyshev
-    - Manhattan
+- `KMeansProcessor<T, TDistance>.Compute(points, dimension, clusterCount, weights?)`
+    - `points` is a flat row-major buffer: n × `dimension` values
+    - optional `weights`: weight of every point, e.g. the number of duplicates
+- `KMeansResult<T>`
+    - `Centroids` (row-major), `Centroid(i)`
+    - `Labels` – cluster index of every point
+    - `Weights` – number of points (sum of weights) in every cluster
+    - `Iterations`
+- `ProcessorOptions`
+    - `ThreadCount`
+    - `MaxIterations`
+    - `ConvergenceEpsilon`
+    - `Seed` – deterministic result for the same seed
+- `IKmInitializer<T>`
+    - `KmInitializer` – random distinct points
+    - `KppInitializer` – K-Means++ (weighted D² seeding)
+- `IDistanceEstimator<T>` – stateless `struct`s, so the JIT inlines them into the hot loop
+    - `EuclideanDistance`, `SquaredEuclideanDistance`
+    - `ChebyshevDistance`
+    - `ManhattanDistance`
 
-`VectorN<T>` where `T` is an any numeric C# type such as integer or floating point, byte, int, double, decimal, etc.
+`T` is any unmanaged numeric C# type: `double`, `float`, `int`, `byte`, `decimal`, etc.
+Distances use `Vector<T>` SIMD when the dimension is at least `Vector<T>.Count`.
+
+```csharp
+var processor = new KMeansProcessor<double, EuclideanDistance<double>>(
+    new KppInitializer<double>(),
+    options: new() { Seed = 42 } );
+
+var result = processor.Compute( points, dimension: 3, clusterCount: 10 );
+var firstCentroid = result.Centroid( 0 );
+```
+
+### Benchmarks
+
+`KMeans.Benchmarks`: 120 000 points from 10 Gaussian blobs, 10 clusters, 20 iterations at most.
+
+```plain
+dotnet run -c Release --project KMeans.Benchmarks -- --filter '*'
+```
 
 ## Im Palette Extractor
 
@@ -30,9 +55,12 @@
 |<img width=250 src="https://github.com/user-attachments/assets/a54fa91a-9af4-4b44-ab8b-a9d1efc728ee">|<img width=250 src="https://github.com/user-attachments/assets/89cfb474-f6d4-4fe9-aecc-05e696204e3c">|<img width=250 src="https://github.com/user-attachments/assets/66dd7a8f-c9da-41bb-bf46-6888150d245e">|
 |<img width=250 src="https://github.com/user-attachments/assets/99744581-e937-44d6-874b-a71c1f129b9d">|<img width=250 src="https://github.com/user-attachments/assets/5636986d-7d3b-4e0f-a605-4f9d6d02258e">|<img width=250 src="https://github.com/user-attachments/assets/26899da7-af1c-4641-8c5c-36ccc4e6dbb3">|
 
-Example of console output: _(the values are close to images above but not actual)_
+Usage: `ImPaletteExtractor [folder]` processes `*.jpeg` from the folder (default: the Pictures folder).
+Identical pixels are merged into one weighted point before clustering.
 
-```plain
+Example of console output: _(the values are close to images above but not actual; the current version also prints the number of unique colors and iterations)_
+
+```text
 Vectors base type = Double
 Number of threads = 8
 Max iterations = 1000

@@ -1,45 +1,68 @@
 using FluentAssertions;
 using KMeans.DistanceEstimators;
-using KMeans.Models;
+using Xunit;
 
-namespace KMeans.Tests.Models
+namespace KMeans.Tests;
+
+public sealed class EuclideanDistanceTests
 {
-    public class EuclideanDistanceTests
+    // Lengths below and above Vector<double>.Count cover the scalar and the SIMD paths.
+    public static TheoryData<double[], double[], double> Cases => new() {
+        { [0, 0], [3, 4], 5 },
+        { [1, 2, 3], [1, 2, 3], 0 },
+        { [1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], 3 },
+        {
+            [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            8
+        },
+    };
+
+    [Theory(DisplayName = "Should estimate the Euclidean distance.")]
+    [Trait("Category", "Unit")]
+    [MemberData(nameof(Cases))]
+    public void ShouldEstimate(double[] a, double[] b, double expected)
     {
-        [Fact]
-        public void CanEstimate()
-        {
-            // Arrange
-            var distance = new EuclideanDistance<double>();
-            var a = new VectorN<double>( 1, 1 );
-            var b = new VectorN<double>( 10, 10 );
-            var expected =
-                Math.Sqrt(
-                    Math.Pow( a[0] - b[0], 2 )
-                    + Math.Pow( a[1] - b[1], 2 ) );
+        // Arrange
+        var distance = new EuclideanDistance<double>();
 
-            // Act
-            var actual = distance.Estimate( a, b );
+        // Act
+        var actual = distance.Estimate(a, b);
 
-            // Assert
-            actual.Should().Be( expected );
-        }
+        // Assert
+        actual.Should().Be(expected);
+    }
 
-        [Fact]
-        public void CanNotEstimateOnDimensionsMismatch()
-        {
-            // Arrange
-            var distance = new EuclideanDistance<double>();
-            var a = new VectorN<double>( 1, 2, 3, 4 );
-            var b = new VectorN<double>( 10, 10 );
+    [Fact(DisplayName = "Should compare with the squared distance.")]
+    [Trait("Category", "Unit")]
+    public void ShouldCompareWithoutRoot()
+    {
+        // Arrange
+        var distance = new EuclideanDistance<double>();
+        double[] a = [0, 0];
+        double[] b = [3, 4];
 
-            // Act
-            var exception = Record.Exception( () =>
-                distance.Estimate( a, b ) );
+        // Act
+        var actual = distance.Compare(a, b);
 
-            // Assert
-            exception.Should().NotBeNull()
-                .And.BeOfType<ArgumentOutOfRangeException>();
-        }
+        // Assert
+        actual.Should().Be(25);
+    }
+
+    [Fact(DisplayName = "Should not estimate vectors of different dimensions.")]
+    [Trait("Category", "Unit")]
+    public void ShouldNotEstimateOnDimensionsMismatch()
+    {
+        // Arrange
+        var distance = new EuclideanDistance<double>();
+        double[] a = [1, 2, 3, 4];
+        double[] b = [10, 10];
+
+        // Act
+        var exception = Record.Exception(() => distance.Estimate(a, b));
+
+        // Assert
+        exception.Should().NotBeNull()
+            .And.BeOfType<ArgumentOutOfRangeException>();
     }
 }

@@ -1,42 +1,64 @@
 using FluentAssertions;
 using KMeans.DistanceEstimators;
-using KMeans.Models;
+using Xunit;
 
-namespace KMeans.Tests.Models
+namespace KMeans.Tests;
+
+public sealed class ChebyshevDistanceTests
 {
-    public class ChebyshevDistanceTests
+    // Lengths below and above Vector<double>.Count cover the scalar and the SIMD paths;
+    // the maximum is placed both in the vectorized part and in the scalar tail.
+    public static TheoryData<double[], double[], double> Cases => new() {
+        { [1, 1], [10, 4], 9 },
+        { [1, 2, 3], [1, 2, 3], 0 },
+        { [-1, 2, -3, 4, -5, 6, -7, 8, -9], [0, 0, 0, 0, 0, 0, 0, 0, 0], 9 },
+        { [-10, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0], 10 },
+    };
+
+    [Theory(DisplayName = "Should estimate the Chebyshev distance.")]
+    [Trait("Category", "Unit")]
+    [MemberData(nameof(Cases))]
+    public void ShouldEstimate(double[] a, double[] b, double expected)
     {
-        [Fact]
-        public void CanEstimate()
-        {
-            // Arrange
-            var distance = new ChebyshevDistance<double>();
-            var a = new VectorN<double>( 1, 1 );
-            var b = new VectorN<double>( 10, 10 );
-            var expected = 9;
+        // Arrange
+        var distance = new ChebyshevDistance<double>();
 
-            // Act
-            var actual = distance.Estimate( a, b );
+        // Act
+        var actual = distance.Estimate(a, b);
 
-            // Assert
-            actual.Should().Be( expected );
-        }
+        // Assert
+        actual.Should().Be(expected);
+    }
 
-        [Fact]
-        public void CanNotEstimateOnDimensionsMismatch()
-        {
-            // Arrange
-            var distance = new EuclideanDistance<double>();
-            var a = new VectorN<double>( 1, 2, 3, 4 );
-            var b = new VectorN<double>( 10, 10 );
+    [Theory(DisplayName = "Should compare with the Chebyshev distance.")]
+    [Trait("Category", "Unit")]
+    [MemberData(nameof(Cases))]
+    public void ShouldCompare(double[] a, double[] b, double expected)
+    {
+        // Arrange
+        var distance = new ChebyshevDistance<double>();
 
-            // Act
-            var exception = Record.Exception( () =>
-                distance.Estimate( a, b ) );
+        // Act
+        var actual = distance.Compare(a, b);
 
-            // Assert
-            exception.Should().NotBeNull()
-                .And.BeOfType<ArgumentOutOfRangeException>();
-        }
+        // Assert
+        actual.Should().Be(expected);
+    }
+
+    [Fact(DisplayName = "Should not estimate vectors of different dimensions.")]
+    [Trait("Category", "Unit")]
+    public void ShouldNotEstimateOnDimensionsMismatch()
+    {
+        // Arrange
+        var distance = new ChebyshevDistance<double>();
+        double[] a = [1, 2, 3, 4];
+        double[] b = [10, 10];
+
+        // Act
+        var exception = Record.Exception(() => distance.Estimate(a, b));
+
+        // Assert
+        exception.Should().NotBeNull()
+            .And.BeOfType<ArgumentOutOfRangeException>();
     }
 }

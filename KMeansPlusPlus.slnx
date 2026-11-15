@@ -1,0 +1,11 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="ImPaletteExtractor/ImPaletteExtractor.csproj" />
+  <Project Path="KMeans.Benchmarks/KMeans.Benchmarks.csproj" />
+  <Project Path="KMeans.Tests/KMeans.Tests.csproj" />
+  <Project Path="KMeans/KMeans.csproj" />
+</Solution>

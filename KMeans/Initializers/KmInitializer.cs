@@ -1,39 +1,36 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
-using KMeans.Models;
 
 namespace KMeans.Initializers;
 
 /// <summary>
-/// Simple cluster initializer.
+/// Simple initializer: centroids are distinct points chosen uniformly at random.
 /// </summary>
-public class KmInitializer<T> : IKmInitializer<T>
-    where T : INumber<T>
+public sealed class KmInitializer<T> : IKmInitializer<T>
+    where T : unmanaged, INumber<T>
 {
-    /// <summary>
-    /// Initialize first iteration by choosing random Centroid volume
-    /// within the given array of volume.
-    /// </summary>
-    /// <param name="volume">
-    /// Vector volume.
-    /// </param>
-    /// <param name="random">
-    /// Randomizer.
-    /// </param>
-    /// <returns>
-    /// Initial cluster set.
-    /// </returns>
-    public KmCluster<T>[] Initialize(
-        VectorN<T>[] volume, int numClusters,
-        IDistanceEstimator<T> distanceEstimator,
-        Random? random = null)
+    public void Initialize<TDistance>(
+        ReadOnlyMemory<T> points,
+        ReadOnlyMemory<int> weights,
+        int dimension,
+        Span<T> centroids,
+        TDistance distance,
+        Random random)
+        where TDistance : struct, IDistanceEstimator<T>
     {
-        random ??= Random.Shared;
+        var n = points.Length / dimension;
+        var clusterCount = centroids.Length / dimension;
+        var chosen = new HashSet<int>(clusterCount);
 
-        KmCluster<T>[] clusters = new KmCluster<T>[numClusters];
-        for (var i = 0; i < numClusters; i++)
-            clusters[i] = new KmCluster<T>(volume[random.Next(volume.Length)]);
+        for (var c = 0; c < clusterCount; c++)
+        {
+            int index;
+            do index = random.Next(n);
+            while (!chosen.Add(index));
 
-        return clusters;
+            points.Span.Slice(index * dimension, dimension)
+                .CopyTo(centroids.Slice(c * dimension, dimension));
+        }
     }
 }
