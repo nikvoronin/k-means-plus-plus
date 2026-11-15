@@ -7,7 +7,8 @@ namespace KMeans.Tests;
 public sealed class SquaredEuclideanDistanceTests
 {
     // Lengths below and above Vector<double>.Count cover the scalar and the SIMD paths.
-    public static TheoryData<double[], double[], double> Cases => new() {
+    public static TheoryData<double[], double[], double> Cases => new()
+    {
         { [1, 1], [10, 10], 162 },
         { [1, 2, 3], [1, 2, 3], 0 },
         { [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 0, 0, 0, 0, 0, 0, 0, 0], 204 },
@@ -57,6 +58,20 @@ public sealed class SquaredEuclideanDistanceTests
 
         // Assert
         actual.Should().Be(13);
+    }
+
+    [Fact(DisplayName = "Should not report the squared Euclidean distance as a metric.")]
+    [Trait("Category", "Unit")]
+    public void ShouldNotBeMetric()
+    {
+        // Arrange
+        var distance = new SquaredEuclideanDistance<double>();
+
+        // Act
+        var actual = distance.IsMetric;
+
+        // Assert
+        actual.Should().BeFalse();
     }
 
     [Fact(DisplayName = "Should not estimate vectors of different dimensions.")]

@@ -12,6 +12,12 @@ public interface IDistanceEstimator<T>
     where T : unmanaged, INumber<T>
 {
     /// <summary>
+    /// <see langword="true"/> when <see cref="Estimate"/> satisfies the triangle inequality.
+    /// Enables the Hamerly bounds that skip most distance computations.
+    /// </summary>
+    bool IsMetric { get; }
+
+    /// <summary>
     /// Distance in the units of the metric.
     /// Used for the convergence epsilon and the K-Means++ seeding.
     /// </summary>

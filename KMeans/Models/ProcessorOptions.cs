@@ -17,4 +17,10 @@ public sealed class ProcessorOptions
     /// <see langword="null"/> means <see cref="Random.Shared"/>.
     /// </summary>
     public int? Seed { get; init; }
+
+    /// <summary>
+    /// Skip distance computations with the Hamerly bounds when the distance is a metric
+    /// (<see cref="IDistanceEstimator{T}.IsMetric"/>). The result is the same as without them.
+    /// </summary>
+    public bool UseHamerlyBounds { get; init; } = true;
 }

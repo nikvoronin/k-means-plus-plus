@@ -147,6 +147,164 @@ public sealed class KMeansProcessorTests
         first.Labels.Should().Equal(second.Labels);
     }
 
+    [Theory(DisplayName = "Should produce the same Euclidean result with and without the Hamerly bounds.")]
+    [Trait("Category", "Unit")]
+    [InlineData(3)]
+    [InlineData(16)]
+    public void ShouldMatchLloydWithEuclidean(int dimension)
+    {
+        // Arrange
+        var hamerly = new KMeansProcessor<double, EuclideanDistance<double>>(
+            new KmInitializer<double>(),
+            options: new()
+            {
+                Seed = 3,
+                ConvergenceEpsilon = 0,
+                MaxIterations = 300
+            });
+        var lloyd = new KMeansProcessor<double, EuclideanDistance<double>>(
+            new KmInitializer<double>(),
+            options: new()
+            {
+                Seed = 3,
+                ConvergenceEpsilon = 0,
+                MaxIterations = 300,
+                UseHamerlyBounds = false
+            });
+        var random = new Random(13);
+        var points = new double[20_000 * dimension];
+        for (var i = 0; i < points.Length; i++)
+        {
+            points[i] = random.NextDouble() * 100;
+        }
+
+        // Act
+        var expected = lloyd.Compute(points, dimension, 8);
+        var actual = hamerly.Compute(points, dimension, 8);
+
+        // Assert
+        actual.Labels.Should().Equal(expected.Labels);
+        actual.Centroids.Should().Equal(expected.Centroids);
+        actual.Iterations.Should().Be(expected.Iterations);
+    }
+
+    [Fact(DisplayName = "Should produce the same Manhattan result with and without the Hamerly bounds.")]
+    [Trait("Category", "Unit")]
+    public void ShouldMatchLloydWithManhattan()
+    {
+        // Arrange
+        var hamerly = new KMeansProcessor<double, ManhattanDistance<double>>(
+            new KmInitializer<double>(),
+            options: new() 
+            { 
+                Seed = 3, 
+                ConvergenceEpsilon = 0, 
+                MaxIterations = 300 
+            });
+        var lloyd = new KMeansProcessor<double, ManhattanDistance<double>>(
+            new KmInitializer<double>(),
+            options: new() 
+            { 
+                Seed = 3, 
+                ConvergenceEpsilon = 0, 
+                MaxIterations = 300, 
+                UseHamerlyBounds = false 
+            });
+        var random = new Random(17);
+        var points = new double[20_000 * 3];
+        for (var i = 0; i < points.Length; i++)
+        {
+            points[i] = random.NextDouble() * 100;
+        }
+
+        // Act
+        var expected = lloyd.Compute(points, 3, 8);
+        var actual = hamerly.Compute(points, 3, 8);
+
+        // Assert
+        actual.Labels.Should().Equal(expected.Labels);
+        actual.Centroids.Should().Equal(expected.Centroids);
+        actual.Iterations.Should().Be(expected.Iterations);
+    }
+
+    [Fact(DisplayName = "Should produce the same Chebyshev result with and without the Hamerly bounds.")]
+    [Trait("Category", "Unit")]
+    public void ShouldMatchLloydWithChebyshev()
+    {
+        // Arrange
+        var hamerly = new KMeansProcessor<double, ChebyshevDistance<double>>(
+            new KmInitializer<double>(),
+            options: new() 
+            { 
+                Seed = 3, 
+                ConvergenceEpsilon = 0, 
+                MaxIterations = 300 
+            });
+        var lloyd = new KMeansProcessor<double, ChebyshevDistance<double>>(
+            new KmInitializer<double>(),
+            options: new() 
+            { 
+                Seed = 3, 
+                ConvergenceEpsilon = 0, 
+                MaxIterations = 300, 
+                UseHamerlyBounds = false 
+            });
+        var random = new Random(19);
+        var points = new double[20_000 * 3];
+        for (var i = 0; i < points.Length; i++)
+        {
+            points[i] = random.NextDouble() * 100;
+        }
+
+        // Act
+        var expected = lloyd.Compute(points, 3, 8);
+        var actual = hamerly.Compute(points, 3, 8);
+
+        // Assert
+        actual.Labels.Should().Equal(expected.Labels);
+        actual.Centroids.Should().Equal(expected.Centroids);
+        actual.Iterations.Should().Be(expected.Iterations);
+    }
+
+    [Fact(DisplayName = "Should ignore the Hamerly bounds for the squared Euclidean distance.")]
+    [Trait("Category", "Unit")]
+    public void ShouldIgnoreBoundsForSquaredEuclidean()
+    {
+        // Arrange
+        var withBounds = new KMeansProcessor<double, SquaredEuclideanDistance<double>>(
+            new KmInitializer<double>(),
+            options: new() 
+            { 
+                Seed = 3, 
+                ConvergenceEpsilon = 0, 
+                MaxIterations = 300 
+            });
+        var lloyd = new KMeansProcessor<double, SquaredEuclideanDistance<double>>(
+            new KmInitializer<double>(),
+            options: new() 
+            { 
+                Seed = 3, 
+                ConvergenceEpsilon = 0, 
+                MaxIterations = 300, 
+                UseHamerlyBounds = false 
+            });
+        var random = new Random(23);
+        var points = new double[20_000 * 3];
+        for (var i = 0; i < points.Length; i++)
+        {
+            points[i] = random.NextDouble() * 100;
+        }
+
+        // Act
+        var expected = lloyd.Compute(points, 3, 8);
+        var actual = withBounds.Compute(points, 3, 8);
+
+        // Assert
+        actual.Labels.Should().Equal(expected.Labels);
+        actual.Centroids.Should().Equal(expected.Centroids);
+        actual.Iterations.Should().Be(expected.Iterations);
+    }
+
     [Fact(DisplayName = "Should cluster integer vectors.")]
     [Trait("Category", "Unit")]
     public void ShouldComputeIntegers()

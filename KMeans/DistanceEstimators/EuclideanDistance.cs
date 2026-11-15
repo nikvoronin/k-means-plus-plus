@@ -9,9 +9,11 @@ namespace KMeans.DistanceEstimators;
 public readonly struct EuclideanDistance<T> : IDistanceEstimator<T>
     where T : unmanaged, INumber<T>, IRootFunctions<T>
 {
-    public T Estimate( ReadOnlySpan<T> a, ReadOnlySpan<T> b ) =>
-        T.Sqrt( SquaredEuclideanDistance<T>.Sum( a, b ) );
+    public bool IsMetric => true;
 
-    public T Compare( ReadOnlySpan<T> a, ReadOnlySpan<T> b ) =>
-        SquaredEuclideanDistance<T>.Sum( a, b );
+    public T Estimate(ReadOnlySpan<T> a, ReadOnlySpan<T> b) =>
+        T.Sqrt(SquaredEuclideanDistance<T>.Sum(a, b));
+
+    public T Compare(ReadOnlySpan<T> a, ReadOnlySpan<T> b) =>
+        SquaredEuclideanDistance<T>.Sum(a, b);
 }

@@ -11,6 +11,11 @@ namespace KMeans.DistanceEstimators;
 public readonly struct SquaredEuclideanDistance<T> : IDistanceEstimator<T>
     where T : unmanaged, INumber<T>
 {
+    /// <summary>
+    /// The squared distance violates the triangle inequality.
+    /// </summary>
+    public bool IsMetric => false;
+
     public T Estimate(ReadOnlySpan<T> a, ReadOnlySpan<T> b) => Sum(a, b);
 
     public T Compare(ReadOnlySpan<T> a, ReadOnlySpan<T> b) => Sum(a, b);

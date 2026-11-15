@@ -7,7 +7,8 @@ namespace KMeans.Tests;
 public sealed class ManhattanDistanceTests
 {
     // Lengths below and above Vector<double>.Count cover the scalar and the SIMD paths.
-    public static TheoryData<double[], double[], double> Cases => new() {
+    public static TheoryData<double[], double[], double> Cases => new()
+    {
         { [1, 1], [10, 10], 18 },
         { [1, 2, 3], [1, 2, 3], 0 },
         { [-1, 2, -3, 4, -5, 6, -7, 8, -9], [0, 0, 0, 0, 0, 0, 0, 0, 0], 45 },
@@ -41,6 +42,20 @@ public sealed class ManhattanDistanceTests
 
         // Assert
         actual.Should().Be(expected);
+    }
+
+    [Fact(DisplayName = "Should report the Manhattan distance as a metric.")]
+    [Trait("Category", "Unit")]
+    public void ShouldBeMetric()
+    {
+        // Arrange
+        var distance = new ManhattanDistance<double>();
+
+        // Act
+        var actual = distance.IsMetric;
+
+        // Assert
+        actual.Should().BeTrue();
     }
 
     [Fact(DisplayName = "Should not estimate vectors of different dimensions.")]

@@ -1,4 +1,4 @@
-﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Attributes;
 using KMeans.DistanceEstimators;
 using KMeans.Initializers;
 using KMeans.Models;
@@ -16,7 +16,8 @@ public class KMeansBenchmarks
     public int Dimension;
 
     private double[] _points = [];
-    private KMeansProcessor<double, EuclideanDistance<double>> _processor = null!;
+    private KMeansProcessor<double, EuclideanDistance<double>> _lloyd = null!;
+    private KMeansProcessor<double, EuclideanDistance<double>> _hamerly = null!;
     private readonly KppInitializer<double> _initializer = new();
     private readonly double[] _centroids = new double[ClusterCount * 16];
 
@@ -25,7 +26,17 @@ public class KMeansBenchmarks
     {
         _points = Blobs.Generate(PointCount, Dimension, blobs: ClusterCount, seed: 42);
 
-        _processor = new KMeansProcessor<double, EuclideanDistance<double>>(
+        _lloyd = new KMeansProcessor<double, EuclideanDistance<double>>(
+            _initializer,
+            options: new ProcessorOptions
+            {
+                MaxIterations = Iterations,
+                ConvergenceEpsilon = 0,
+                Seed = 1,
+                UseHamerlyBounds = false
+            });
+
+        _hamerly = new KMeansProcessor<double, EuclideanDistance<double>>(
             _initializer,
             options: new ProcessorOptions
             {
@@ -35,9 +46,14 @@ public class KMeansBenchmarks
             });
     }
 
+    [Benchmark(Baseline = true)]
+    public int ComputeLloyd() =>
+        _lloyd.Compute(_points, Dimension, ClusterCount)
+        .Iterations;
+
     [Benchmark]
-    public int Compute() =>
-        _processor.Compute(_points, Dimension, ClusterCount)
+    public int ComputeHamerly() =>
+        _hamerly.Compute(_points, Dimension, ClusterCount)
         .Iterations;
 
     [Benchmark]

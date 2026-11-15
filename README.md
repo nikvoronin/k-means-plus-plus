@@ -19,10 +19,13 @@
     - `MaxIterations`
     - `ConvergenceEpsilon`
     - `Seed` – deterministic result for the same seed
+    - `UseHamerlyBounds` (default `true`) – skip distance computations with the Hamerly bounds;
+      same result, applied only to metrics (`IsMetric`), not to `SquaredEuclideanDistance`
 - `IKmInitializer<T>`
     - `KmInitializer` – random distinct points
     - `KppInitializer` – K-Means++ (weighted D² seeding)
-- `IDistanceEstimator<T>` – stateless `struct`s, so the JIT inlines them into the hot loop
+- `IDistanceEstimator<T>` – stateless `struct`s, so the JIT inlines them into the hot loop;
+  `IsMetric` tells whether the triangle inequality holds
     - `EuclideanDistance`, `SquaredEuclideanDistance`
     - `ChebyshevDistance`
     - `ManhattanDistance`
@@ -33,15 +36,16 @@ Distances use `Vector<T>` SIMD when the dimension is at least `Vector<T>.Count`.
 ```csharp
 var processor = new KMeansProcessor<double, EuclideanDistance<double>>(
     new KppInitializer<double>(),
-    options: new() { Seed = 42 } );
+    options: new() { Seed = 42 });
 
-var result = processor.Compute( points, dimension: 3, clusterCount: 10 );
-var firstCentroid = result.Centroid( 0 );
+var result = processor.Compute(points, dimension: 3, clusterCount: 10);
+var firstCentroid = result.Centroid(0);
 ```
 
 ### Benchmarks
 
 `KMeans.Benchmarks`: 120 000 points from 10 Gaussian blobs, 10 clusters, 20 iterations at most.
+`ComputeLloyd` and `ComputeHamerly` compare the iterations without and with the Hamerly bounds.
 
 ```plain
 dotnet run -c Release --project KMeans.Benchmarks -- --filter '*'
