@@ -63,7 +63,7 @@ Same workload as above, BenchmarkDotNet, .NET 10.0.15, x64, AVX2, 22 logical cor
 The `legacy-net8` code was run on the same .NET 10 runtime, so the numbers show the code changes only.
 
 | Benchmark | Dimension | `legacy-net8` | Lloyd | Hamerly (default) | Speed-up |
-|---|---:|---:|---:|---:|---:|
+| --- | ---: | ---: | ---: | ---: | ---: |
 | Compute: time | 3 | 364 ms | 33.5 ms | **18.4 ms** | ×20 |
 | Compute: allocated | 3 | 488 MB | 1.8 MB | 3.6 MB | ×135 less |
 | Compute: time | 16 | 263–407 ms¹ | 72.8 ms | **23.8 ms** | ×11–17 |
@@ -84,7 +84,23 @@ Where it comes from:
 - K-Means++ updates the distances to the newest centroid only: O(n·k) instead of O(n·k²), in parallel.
 - Small fixed ranges with ordered merging: balanced load on hybrid CPUs and deterministic sums.
 - The palette extractor reads pixels with `LockBits` instead of `GetPixel`
-  and merges identical colors into weighted points (~90 000 pixels → 8 000–21 000 points).
+  and merges identical colors into weighted points (42 000 points per image on average, see below).
+
+### Palette extraction on real images
+
+`ImPaletteExtractor` on 256 wallpaper photos (JPEG, downscaled to 400 px wide), 10 clusters,
+time of the clustering only (`Found in`), images processed one by one:
+
+| | Total | Mean | Median | 90th percentile |
+| --- | ---: | ---: | ---: | ---: |
+| `legacy-net8` on .NET 8 | 160.7 s | 628 ms | 528 ms | 1069 ms |
+| `legacy-net8` on .NET 10 | 154.9 s | 605 ms | 534 ms | 922 ms |
+| current version | **3.0 s** | **11.8 ms** | **9 ms** | **17 ms** |
+
+About 50 times faster in total and per image. The newer runtime alone gives the legacy code only 4%.
+The current version clusters the unique colors with their pixel counts as weights
+(42 000 points per image on average instead of up to 240 000 pixels), the legacy one clusters every pixel.
+Neither version was seeded, so the initial centroids and the number of iterations vary between runs.
 
 ## Im Palette Extractor
 
