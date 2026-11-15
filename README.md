@@ -7,8 +7,8 @@
 - no per-point allocations
 - and deterministic results for a fixed seed.
 
-[Vector-3](https://github.com/nikvoronin/k-means-plus-plus/tree/vector-3) branch contains simple but more efficient version of image palette extraction.
-It is using `System.Numerics.Vector3` type and applied in [The Last Wallpaper](https://github.com/nikvoronin/LastWallpaper/tree/main/LastWallpaper/Logic/KMeans) project to make colored mosaic tray icons.
+[Vector-3](https://github.com/nikvoronin/k-means-plus-plus/tree/vector-3) branch contains a simpler version of image palette extraction.
+It uses `System.Numerics.Vector3` type and applied in [The Last Wallpaper](https://github.com/nikvoronin/LastWallpaper/tree/main/LastWallpaper/Logic/KMeans) project to make colored mosaic tray icons. The [current version](#results-compared-to-legacy-net8) is about 5 times faster than it on the same `float` data and allocates 65 times less memory.
 
 ## K-Means Processor
 
