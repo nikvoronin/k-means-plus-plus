@@ -1,0 +1,57 @@
+name: Publish NuGet package
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Version from tag
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      - name: Test
+        run: dotnet test --project ./KMeans.Tests/KMeans.Tests.csproj -c Release
+
+      - name: Build
+        run: dotnet build ./KMeans/KMeans.csproj -c Release -p:Version="$VERSION"
+
+      - name: Pack
+        run: dotnet pack ./KMeans/KMeans.csproj -c Release --no-build -o ./artifacts -p:Version="$VERSION"
+
+      - name: List artifacts
+        run: ls -la ./artifacts
+
+      # Short-lived API key from the trusted publishing policy on nuget.org.
+      - name: NuGet login
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      # Pushes the .snupkg next to the .nupkg as well.
+      - name: Push package and symbols
+        run: >
+          dotnet nuget push ./artifacts/*.nupkg
+          --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

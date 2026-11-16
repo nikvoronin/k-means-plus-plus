@@ -16,8 +16,10 @@ public readonly struct SquaredEuclideanDistance<T> : IDistanceEstimator<T>
     /// </summary>
     public bool IsMetric => false;
 
+    /// <inheritdoc/>
     public T Estimate(ReadOnlySpan<T> a, ReadOnlySpan<T> b) => Sum(a, b);
 
+    /// <inheritdoc/>
     public T Compare(ReadOnlySpan<T> a, ReadOnlySpan<T> b) => Sum(a, b);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

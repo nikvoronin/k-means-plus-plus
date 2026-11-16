@@ -10,6 +10,7 @@ namespace KMeans.Initializers;
 public sealed class KmInitializer<T> : IKmInitializer<T>
     where T : unmanaged, INumber<T>
 {
+    /// <inheritdoc/>
     public void Initialize<TDistance>(
         ReadOnlyMemory<T> points,
         ReadOnlyMemory<int> weights,

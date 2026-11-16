@@ -10,8 +10,10 @@ namespace KMeans.DistanceEstimators;
 public readonly struct ManhattanDistance<T> : IDistanceEstimator<T>
     where T : unmanaged, INumber<T>
 {
+    /// <inheritdoc/>
     public bool IsMetric => true;
 
+    /// <inheritdoc/>
     public T Estimate(ReadOnlySpan<T> a, ReadOnlySpan<T> b)
     {
         if (a.Length != b.Length)
@@ -47,5 +49,6 @@ public readonly struct ManhattanDistance<T> : IDistanceEstimator<T>
         return acc;
     }
 
+    /// <inheritdoc/>
     public T Compare(ReadOnlySpan<T> a, ReadOnlySpan<T> b) => Estimate(a, b);
 }

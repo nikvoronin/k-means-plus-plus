@@ -10,8 +10,10 @@ namespace KMeans.DistanceEstimators;
 public readonly struct ChebyshevDistance<T> : IDistanceEstimator<T>
     where T : unmanaged, INumber<T>
 {
+    /// <inheritdoc/>
     public bool IsMetric => true;
 
+    /// <inheritdoc/>
     public T Estimate(ReadOnlySpan<T> a, ReadOnlySpan<T> b)
     {
         if (a.Length != b.Length)
@@ -51,5 +53,6 @@ public readonly struct ChebyshevDistance<T> : IDistanceEstimator<T>
         return distance;
     }
 
+    /// <inheritdoc/>
     public T Compare(ReadOnlySpan<T> a, ReadOnlySpan<T> b) => Estimate(a, b);
 }

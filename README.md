@@ -1,4 +1,10 @@
-# Multithreading K-Means++ algorithm
+# Fast K-Means++
+
+Fast K-Means++ clustering for N-dimensional numerical data, with SIMD, parallel processing and Hamerly acceleration.
+
+||||
+|:---:|:---:|:---:|
+|<img width=250 src="https://github.com/user-attachments/assets/89cfb474-f6d4-4fe9-aecc-05e696204e3c">|<img width=250 src="https://github.com/user-attachments/assets/66dd7a8f-c9da-41bb-bf46-6888150d245e">|<img width=210 src="https://github.com/user-attachments/assets/26899da7-af1c-4641-8c5c-36ccc4e6dbb3">|
 
 - with multidimensional vectors
 - Hamerly acceleration

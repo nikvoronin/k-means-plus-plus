@@ -3,6 +3,9 @@ using System.Numerics;
 
 namespace KMeans;
 
+/// <summary>
+/// Chooses the initial centroids for the <see cref="KMeansProcessor{T, TDistance}"/>.
+/// </summary>
 public interface IKmInitializer<T>
     where T : unmanaged, INumber<T>
 {

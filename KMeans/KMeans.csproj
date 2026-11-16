@@ -1,8 +1,39 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <AssemblyName>FastKMeans</AssemblyName>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <PackageId>FastKMeans</PackageId>
+        <Authors>Nikolai Voronin</Authors>
+        <Copyright>Copyright (c) 2026 Nikolai Voronin</Copyright>
+        <Description>Fast K-Means++ clustering for N-dimensional numerical data, with SIMD, parallel processing and Hamerly acceleration.</Description>
+
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>kmeans;k-means;kmeans-plus-plus;clustering;cluster-analysis;unsupervised-learning;machine-learning;hamerly;simd;color-quantization</PackageTags>
+        <PackageProjectUrl>https://github.com/nikvoronin/k-means-plus-plus</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/nikvoronin/k-means-plus-plus.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+        <PackageReleaseNotes>Optimized multidimensional vectors, Hamerly acceleration, SIMD distances, weighted points, no per-point allocations and deterministic results for a fixed seed.</PackageReleaseNotes>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IsAotCompatible>true</IsAotCompatible>
+        <EnablePackageValidation>true</EnablePackageValidation>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
 
 </Project>

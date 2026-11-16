@@ -2,9 +2,20 @@
 
 namespace KMeans.Models;
 
+/// <summary>
+/// Options of the <see cref="KMeansProcessor{T, TDistance}"/>.
+/// </summary>
 public sealed class ProcessorOptions
 {
+    /// <summary>
+    /// Maximum number of threads;
+    /// <see cref="Environment.ProcessorCount"/> by default.
+    /// </summary>
     public int ThreadCount { get; init; } = Environment.ProcessorCount;
+
+    /// <summary>
+    /// Stop after this number of iterations even if not converged.
+    /// </summary>
     public int MaxIterations { get; init; } = 1000;
 
     /// <summary>
