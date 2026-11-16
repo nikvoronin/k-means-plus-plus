@@ -9,7 +9,7 @@
     <PropertyGroup>
         <PackageId>FastKMeans</PackageId>
         <Authors>Nikolai Voronin</Authors>
-        <Copyright>Copyright (c) 2026 Nikolai Voronin</Copyright>
+        <Copyright>Copyright (c) 2024 Nikolai Voronin</Copyright>
         <Description>Fast K-Means++ clustering for N-dimensional numerical data, with SIMD, parallel processing and Hamerly acceleration.</Description>
 
         <PackageReadmeFile>README.md</PackageReadmeFile>
